@@ -1,0 +1,249 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Modern font stack with contemporary typography */
+
+body {
+  font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-variant-numeric: tabular-nums;
+}
+
+pre,
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+  font-feature-settings: 'liga', 'calt', 'zero', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08';
+}
+
+/* Custom styles for rendered Markdown content */
+.prose {
+  @apply text-gray-300 leading-relaxed;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-variant-numeric: tabular-nums;
+}
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  @apply text-white font-bold tracking-tight;
+}
+.prose h1 {
+  @apply text-3xl mt-8 mb-4 border-b border-slate-700 pb-2;
+}
+.prose h2 {
+  @apply text-2xl mt-8 mb-4 border-b border-slate-700 pb-2;
+}
+.prose h3 {
+  @apply text-xl mt-6 mb-3;
+}
+.prose p {
+  @apply my-4;
+}
+.prose a {
+  @apply text-blue-400 hover:text-blue-300 hover:underline;
+}
+.prose ul,
+.prose ol {
+  @apply my-4 pl-6;
+}
+.prose ul {
+  @apply list-disc;
+}
+.prose ol {
+  @apply list-decimal;
+}
+.prose li {
+  @apply my-2;
+}
+.prose blockquote {
+  @apply my-4 p-4 bg-slate-800/50 border-l-4 border-slate-600 italic text-gray-400;
+}
+.prose strong {
+  @apply text-gray-200 font-semibold;
+}
+/* Inline code blocks */
+.prose :not(pre) > code {
+  @apply bg-slate-700/70 text-sm rounded px-1.5 py-1 font-mono text-blue-300;
+}
+/* Full code blocks (handled by SyntaxHighlighter) */
+.prose pre {
+  @apply rounded-lg my-6;
+}
+.prose table {
+  @apply w-full my-6 border-collapse;
+}
+.prose thead {
+  @apply bg-slate-800;
+}
+.prose th,
+.prose td {
+  @apply border border-slate-700 px-4 py-2 text-left;
+}
+.prose th {
+  @apply font-semibold text-gray-200;
+}
+
+/* Custom shimmer animation for improve prompt icon */
+@keyframes shimmer {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Focus styles for better accessibility */
+.focus-visible:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* File Tree Component Styles */
+.file-tree {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+  font-feature-settings: 'liga', 'calt', 'zero', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08';
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
+  letter-spacing: 0.025em;
+}
+
+.file-tree::-webkit-scrollbar {
+  width: 8px;
+}
+
+.file-tree::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.file-tree::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.file-tree::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.file-tree-node {
+  transition: all 0.2s ease-in-out;
+}
+
+.file-tree-node:hover {
+  background-color: rgba(51, 65, 85, 0.3);
+}
+
+.file-tree-folder {
+  font-weight: 500;
+  color: #93c5fd; /* blue-300 */
+}
+
+.file-tree-file {
+  color: #cbd5e1; /* slate-300 */
+}
+
+.file-tree-comment {
+  color: #64748b; /* slate-500 */
+  font-style: italic;
+}
+
+.file-tree-connector {
+  color: #64748b; /* slate-500 */
+  font-size: 0.75rem;
+  user-select: none;
+}
+
+.file-tree-icon {
+  transition: transform 0.2s ease-in-out;
+}
+
+.file-tree-expand-icon {
+  transition: transform 0.2s ease-in-out;
+}
+
+.file-tree-expanded .file-tree-expand-icon {
+  transform: rotate(90deg);
+}
+
+/* Smooth expand/collapse animation */
+.file-tree-children {
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.file-tree-collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.file-tree-expanded {
+  max-height: 1000px;
+  opacity: 1;
+}
