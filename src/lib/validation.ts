@@ -2,7 +2,6 @@
 
 export function sanitizeInput(input: string): string {
   return input
-    .trim()
     .replace(/[<>]/g, '') // Remove potential HTML tags
     .replace(/javascript:/gi, '') // Remove javascript: protocols
     .replace(/on\w+\s*=/gi, '') // Remove event handlers

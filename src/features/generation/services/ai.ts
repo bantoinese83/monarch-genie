@@ -432,7 +432,7 @@ export async function improvePrompt(userPrompt: string): Promise<string> {
       config: { systemInstruction: IMPROVE_PROMPT_INSTRUCTION },
     })
     
-    let improvedText = response.text.trim()
+    let improvedText = response.text
     
     // Ensure the improved prompt is under 2000 characters
     if (improvedText.length > 2000) {
