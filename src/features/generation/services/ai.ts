@@ -12,7 +12,7 @@ async function getClient() {
   return new GoogleGenAICtor({ apiKey })
 }
 
-const SYSTEM_INSTRUCTION = `You are **GENIE** (Generative Enterprise-grade Implementation Engineer), an AI system architect. Your purpose is to take a user's simple application idea and generate a complete, end-to-end, enterprise-level technical specification. This specification is designed to be fed directly into a series of code-generation LLMs to build, test, deploy, and document the entire application.
+const SYSTEM_INSTRUCTION = `You are **GENIE** (Generative Enterprise-grade Implementation Engineer), an AI system architect with access to real-time web data. Your purpose is to take a user's simple application idea and generate a complete, end-to-end, enterprise-level technical specification grounded in current market data and best practices. This specification is designed to be fed directly into a series of code-generation LLMs to build, test, deploy, and document the entire application.
 
 **RESPONSE FORMAT REQUIREMENTS:**
 1. **App Name**: Start with a compelling, creative app name in a single line
@@ -29,6 +29,8 @@ const SYSTEM_INSTRUCTION = `You are **GENIE** (Generative Enterprise-grade Imple
 - Use clear, specific instructions and consistent formatting throughout
 - Follow the exact response format specified above
 - **Include comprehensive business and design elements** - monetization strategy, UI/UX wireframes, color palettes, branding concepts, and pitch materials
+- **Use real-time data when available** - search for current market trends, pricing models, and competitive analysis
+- **Cite sources appropriately** - when making claims about market data, trends, or specific information, ensure it's grounded in current web data
 
 **TECHNOLOGY STACK :**
 - **Frontend**: Next.js 14+ (App Router), React 18, TypeScript
@@ -42,6 +44,13 @@ const SYSTEM_INSTRUCTION = `You are **GENIE** (Generative Enterprise-grade Imple
 - **Branding**: Suggest logo concepts, brand personality, and visual identity guidelines
 - **Monetization**: Detail revenue models, pricing strategies, and payment integration approaches
 - **Pitch Materials**: Create compelling value propositions and market positioning strategies
+
+**REAL-TIME DATA INTEGRATION:**
+- Use current market data, trends, and competitive analysis from web search
+- Include up-to-date technology stack recommendations and best practices
+- Reference recent industry reports, case studies, and market insights
+- Provide current pricing models and market positioning strategies
+- Cite sources and provide verifiable information when making claims
 
 **PROJECT STRUCTURE TEMPLATE:**
 Use this exact format with tree-style characters, customized for the specific application:
@@ -421,11 +430,23 @@ export async function generateBlueprintStream(
 ): Promise<void> {
   try {
     const ai = await getClient()
+    
+    // Configure grounding with Google Search for real-time information
+    const groundingTool = {
+      googleSearch: {},
+    }
+    
+    const config = {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      tools: [groundingTool],
+    }
+    
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-2.5-flash',
       contents: userPrompt,
-      config: { systemInstruction: SYSTEM_INSTRUCTION },
+      config,
     })
+    
     for await (const chunk of responseStream) {
       onChunk(chunk.text)
     }
@@ -439,10 +460,21 @@ export async function improvePrompt(userPrompt: string): Promise<string> {
   if (!userPrompt.trim()) return userPrompt
   try {
     const ai = await getClient()
+    
+    // Configure grounding with Google Search for real-time information
+    const groundingTool = {
+      googleSearch: {},
+    }
+    
+    const config = {
+      systemInstruction: IMPROVE_PROMPT_INSTRUCTION,
+      tools: [groundingTool],
+    }
+    
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: userPrompt,
-      config: { systemInstruction: IMPROVE_PROMPT_INSTRUCTION },
+      config,
     })
     
     let improvedText = response.text
@@ -474,4 +506,69 @@ export function extractAppName(content: string): string {
   }
   
   return 'Untitled App'
+}
+
+// Utility function to process grounding metadata and add citations
+export function processGroundingMetadata(response: any): {
+  text: string
+  sources: Array<{ title: string; uri: string }>
+  hasGrounding: boolean
+} {
+  const text = response.text || ''
+  const groundingMetadata = response.candidates?.[0]?.groundingMetadata
+  
+  if (!groundingMetadata) {
+    return { text, sources: [], hasGrounding: false }
+  }
+  
+  const sources = groundingMetadata.groundingChunks?.map((chunk: any) => ({
+    title: chunk.web?.title || 'Unknown Source',
+    uri: chunk.web?.uri || '#'
+  })) || []
+  
+  // Add inline citations to the text
+  const supports = groundingMetadata.groundingSupports || []
+  const chunks = groundingMetadata.groundingChunks || []
+  
+  if (supports.length === 0) {
+    return { text, sources, hasGrounding: true }
+  }
+  
+  // Sort supports by end_index in descending order to avoid shifting issues
+  const sortedSupports = [...supports].sort(
+    (a, b) => (b.segment?.endIndex ?? 0) - (a.segment?.endIndex ?? 0)
+  )
+  
+  let textWithCitations = text
+  
+  for (const support of sortedSupports) {
+    const endIndex = support.segment?.endIndex
+    if (endIndex === undefined || !support.groundingChunkIndices?.length) {
+      continue
+    }
+    
+    const citationLinks = support.groundingChunkIndices
+      .map((i: number) => {
+        const uri = chunks[i]?.web?.uri
+        if (uri) {
+          return `[${i + 1}](${uri})`
+        }
+        return null
+      })
+      .filter(Boolean)
+    
+    if (citationLinks.length > 0) {
+      const citationString = citationLinks.join(', ')
+      textWithCitations = 
+        textWithCitations.slice(0, endIndex) + 
+        citationString + 
+        textWithCitations.slice(endIndex)
+    }
+  }
+  
+  return { 
+    text: textWithCitations, 
+    sources, 
+    hasGrounding: true 
+  }
 }
